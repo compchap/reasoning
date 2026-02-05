@@ -140,6 +140,7 @@ celerybeat.pid
 .venv
 env/
 venv/
+venv-reasoning/
 ENV/
 env.bak/
 venv.bak/
@@ -205,3 +206,7 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+# Models
+qwen3
