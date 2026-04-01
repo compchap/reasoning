@@ -210,3 +210,10 @@ __marimo__/
 
 # Models
 qwen3
+
+# evaluations
+evals/
+
+check_vulnerabilities.ipynb
+math500-cpu.jsonl
+math500_test.json
