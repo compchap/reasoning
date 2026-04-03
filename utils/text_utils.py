@@ -173,6 +173,60 @@ def generate_text_stream_concat_flex(
             )
     return tokenizer.decode(generated_ids)
 
+# rollout generation function 
+# Chapter 6
+@torch.no_grad()
+def sample_response(
+    model,
+    tokenizer,
+    prompt,
+    device,
+    max_new_tokens=512,
+    temperature=0.8,
+    top_p=0.9,
+):
+    input_ids = torch.tensor(
+        tokenizer.encode(prompt),
+        device=device
+        )
+
+    # Cache past keys and values for efficient generation
+    cache = KVCache(n_layers=model.cfg["n_layers"])
+    model.reset_kv_cache()
+    logits = model(input_ids.unsqueeze(0), cache=cache)[:, -1]
+ 
+    generated = []
+    for _ in range(max_new_tokens):
+        # Apply temperature scaling
+        if temperature and temperature != 1.0:
+            logits = logits / temperature
+ 
+        probas = torch.softmax(logits, dim=-1)
+        # Apply top-p filter 
+        probas = top_p_filter(probas, top_p)
+        next_token = torch.multinomial(
+            probas.cpu(), num_samples=1
+        ).to(device)
+ 
+        token_id = next_token.item()
+        generated.append(token_id)
+ 
+        if (
+            tokenizer.eos_token_id is not None
+            and token_id == tokenizer.eos_token_id
+        ):
+            break
+ 
+        logits = model(next_token, cache=cache)[:, -1]
+ 
+    full_token_ids = torch.cat(
+        [input_ids,
+         torch.tensor(generated, device=device, dtype=input_ids.dtype),]
+    )
+    return full_token_ids, input_ids.numel(), tokenizer.decode(generated)
+ 
+ 
+
 def scale_logits_by_temperature(logits, temperature):
     if temperature <= 0:
         raise ValueError("Temperature must be positive")

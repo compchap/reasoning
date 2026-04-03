@@ -1,3 +1,5 @@
+import torch
+
 def get_last_boxed(text):
     boxed_start = r"\boxed"
     boxed_start_idx = text.rfind(boxed_start)
@@ -281,3 +283,29 @@ def render_prompt(prompt):
     )
     return template
 
+@torch.inference_mode()
+def avg_logprob_answer(model, tokenizer, prompt, answer, device="cpu"):
+
+    # Encode prompt and answer tokens separately to get the prompt length later
+    prompt_ids = tokenizer.encode(prompt)
+    answer_ids = tokenizer.encode(answer)
+    full_ids = torch.tensor(prompt_ids + answer_ids, device=device)
+
+    # Same as in calc_next_token_logprobas before
+    logits = model(full_ids.unsqueeze(0)).squeeze(0)
+    logprobs = torch.log_softmax(logits, dim=-1)
+
+    # Index range for positions corresponding to answer tokens
+    start = len(prompt_ids) - 1
+    end = full_ids.shape[0] - 1
+ 
+    # Same as before, except for using start and end
+    t_idx = torch.arange(start, end, device=device)
+    next_tokens = full_ids[start + 1 : end + 1]
+    next_token_logps = logprobs[t_idx, next_tokens]
+ 
+    # Average over the answer token scores
+    return torch.mean(next_token_logps)
+ 
+
+ 
