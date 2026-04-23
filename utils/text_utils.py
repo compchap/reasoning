@@ -138,6 +138,7 @@ def generate_text_stream_concat(
     return tokenizer.decode(generated_ids)
 
 # modified generate_text_stream_concat function, to pass function for text generation
+@torch.inference_mode()
 def generate_text_stream_concat_flex(
     model, tokenizer, prompt, device, max_new_tokens,
     verbose=False, 
@@ -175,6 +176,9 @@ def generate_text_stream_concat_flex(
 
 # rollout generation function 
 # Chapter 6
+# identical to generate_text_stream_concat_flex. 
+# @inference_mode, which disables several PyTorch features for efficiency, meaning incompatible for training where backward pass is required for the optimizer to update model weight after pytorch computes gradient from the loss.
+# with @torch.no_grad decorator, which disables gradient tracking for the forward pass without switching PyTorch into inference-only mode
 @torch.no_grad()
 def sample_response(
     model,
@@ -197,11 +201,13 @@ def sample_response(
  
     generated = []
     for _ in range(max_new_tokens):
+        
         # Apply temperature scaling
         if temperature and temperature != 1.0:
             logits = logits / temperature
  
         probas = torch.softmax(logits, dim=-1)
+        
         # Apply top-p filter 
         probas = top_p_filter(probas, top_p)
         next_token = torch.multinomial(

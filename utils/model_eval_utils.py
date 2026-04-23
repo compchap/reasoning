@@ -86,17 +86,17 @@ SUPERSCRIPT_MAP = {
     "⁺": "+", "⁻": "-", "⁽": "(", "⁾": ")",
 }
 
-"""
-This function takes an extracted answer string and rewrites it into a standardized format that we can reliably compare against reference solutions. 
-It first strips away special tokens and unnecessary LaTeX clutter, such as \left, \right, or degree symbols. 
-It then unwraps cases like \text{...}, removes inline math markers, and rewrites common structures into a calculator-style form. 
-For example, 
-    it turns \sqrt{a} into sqrt(a) and \frac{a}{b} into (a)/(b). 
+# """
+# This function takes an extracted answer string and rewrites it into a standardized format that we can reliably compare against reference solutions. 
+# It first strips away special tokens and unnecessary LaTeX clutter, such as \left, \right, or degree symbols. 
+# It then unwraps cases like \text{...}, removes inline math markers, and rewrites common structures into a calculator-style form. 
+# For example, 
+#     it turns \sqrt{a} into sqrt(a) and \frac{a}{b} into (a)/(b). 
 
-Finally, it normalizes exponents, mixed numbers, and thousands separators and cleans up braces and casing. 
+# Finally, it normalizes exponents, mixed numbers, and thousands separators and cleans up braces and casing. 
 
-In short, the function transforms differently formatted LaTeX outputs into a clean, standardized string representation.
-"""
+# In short, the function transforms differently formatted LaTeX outputs into a clean, standardized string representation.
+# """
 def normalize_text(text):
     if not text:
         return ""
@@ -267,6 +267,7 @@ def grade_answer(pred_text, gt_text):
         if (gt_parts and pred_parts
            and len(gt_parts) == len(pred_parts)):
             # Check each part for mathematical equivalence
+            # check if every element in an iterable object (like a list, tuple, or dictionary) evaluates to True. 
             result = all(
                 equality_check(gt, pred)
                 for gt, pred in zip(gt_parts, pred_parts) 
