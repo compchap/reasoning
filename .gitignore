@@ -210,10 +210,24 @@ __marimo__/
 
 # Models
 qwen3
+*.pth
+checkpoints/
 
-# evaluations
+# Training data
+deepseek-r1-math-train.json
+math_train.json
+
+# Evaluation outputs
 evals/
+*.jsonl
+
+# Generated metrics
+metrics/
+
+# Certificates & secrets
+*.pem
+*.key
+*.cert
 
 check_vulnerabilities.ipynb
-math500-cpu.jsonl
 math500_test.json
